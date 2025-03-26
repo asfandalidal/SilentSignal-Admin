@@ -2,7 +2,10 @@ package com.azeemi.adminannouncement.data.remote
 
 import com.azeemi.adminannouncement.domain.model.Announcement
 import com.azeemi.adminannouncement.domain.model.AnnouncementRequest
+import com.azeemi.adminannouncement.domain.model.NotificationRequest
+import okhttp3.ResponseBody
 import retrofit2.Call
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -19,4 +22,7 @@ interface ApiService {
 
     @DELETE("{id}")
     suspend fun deleteAnnouncement(@Path("id") id: Long)
+
+    @POST("send")
+    suspend fun sendNotification(@Body request: NotificationRequest): Response<ResponseBody>
 }

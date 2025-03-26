@@ -61,6 +61,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.firebase.messaging)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -90,10 +91,11 @@ dependencies {
         implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
         // Compose Integration with ViewModel
         implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
-
+        //hilt
         implementation ("androidx.hilt:hilt-navigation-compose:1.1.0")
         implementation ("com.google.dagger:hilt-android:2.50")
         kapt ("com.google.dagger:hilt-compiler:2.50")
+
 
     }
 

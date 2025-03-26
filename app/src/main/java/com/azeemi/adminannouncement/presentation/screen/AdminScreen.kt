@@ -21,6 +21,7 @@ import org.threeten.bp.format.DateTimeFormatter
 
 @Composable
 fun AdminScreen(viewModel: AnnouncementViewModel = hiltViewModel()) {
+
     val announcements by viewModel.announcements.collectAsState()
     val initialLoading by viewModel.initialLoading.collectAsState()
     var message by remember { mutableStateOf("") }
@@ -37,7 +38,7 @@ fun AdminScreen(viewModel: AnnouncementViewModel = hiltViewModel()) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF121212)) // Dark Mode
+            .background(Color(0xFF121212))
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -71,8 +72,14 @@ fun AdminScreen(viewModel: AnnouncementViewModel = hiltViewModel()) {
                         message,
                         formattedDateTime,
                         onSuccess = {
+                            // Send the notification after announcement creation
+                            viewModel.sendNotification(
+                                title = "New Announcement",
+                                body = message
+                            )
+
                             Toast.makeText(context, "Created!", Toast.LENGTH_SHORT).show()
-                            message = "" // Clear input after success
+                            message = ""
                             expiresAt = null
                         },
                         onError = { Toast.makeText(context, it, Toast.LENGTH_LONG).show() }
@@ -86,6 +93,7 @@ fun AdminScreen(viewModel: AnnouncementViewModel = hiltViewModel()) {
         ) {
             Text("Create Announcement", color = Color.White)
         }
+
 
         Spacer(modifier = Modifier.height(20.dp))
 

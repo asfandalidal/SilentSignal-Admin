@@ -3,7 +3,6 @@ package com.azeemi.adminannouncement.presentation.screen
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
-import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -61,14 +60,14 @@ fun AnnouncementItem(
     var showDialog by remember { mutableStateOf(false) }
 
     Card(
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF222222)), // Darker background
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF222222)),
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp, vertical = 6.dp), // Compact padding
         elevation = CardDefaults.elevatedCardElevation(4.dp)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp) // Balanced padding
+            modifier = Modifier.padding(16.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -79,12 +78,12 @@ fun AnnouncementItem(
                     color = Color.White,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.weight(1f) // Takes up available space
+                    modifier = Modifier.weight(1f)
                 )
 
                 IconButton(
                     onClick = { showDialog = true },
-                    modifier = Modifier.size(24.dp) // Compact button
+                    modifier = Modifier.size(24.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Delete,
@@ -190,7 +189,3 @@ fun showDateTimePicker(context: Context, onDateTimeSelected: (LocalDateTime) -> 
     ).show()
 }
 
-// Toast Helper Function
-fun showToast(context: android.content.Context, message: String) {
-    Toast.makeText(context, message, Toast.LENGTH_LONG).show()
-}
