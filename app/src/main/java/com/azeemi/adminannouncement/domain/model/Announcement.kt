@@ -5,5 +5,4 @@ data class Announcement(
     val message: String,
     val createdAt: String,
     val expiresAt: String,
-    val user: User
 )

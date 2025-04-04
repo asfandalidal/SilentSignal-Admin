@@ -59,7 +59,7 @@ fun AdminScreen(viewModel: AnnouncementViewModel = hiltViewModel()) {
         )
 
         // Expiry Date & Time Picker
-        ExpiresAtPicker(expiresAt) { expiresAt = it }
+        expiresAt?.let { ExpiresAtPicker(it) { expiresAt = it } }
 
         Spacer(modifier = Modifier.height(12.dp))
 

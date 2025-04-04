@@ -136,12 +136,12 @@ fun AnnouncementItem(
 
 // Expiry Date and Time Picker
 @Composable
-fun ExpiresAtPicker(expiresAt: LocalDateTime?, onDateSelected: (LocalDateTime) -> Unit) {
+fun ExpiresAtPicker(expiresAt: LocalDateTime, onDateSelected: (LocalDateTime) -> Unit) {
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
 
     // Convert LocalDateTime to Calendar if available
-    expiresAt?.let {
+    expiresAt.let {
         calendar.set(Calendar.YEAR, it.year)
         calendar.set(Calendar.MONTH, it.monthValue - 1)
         calendar.set(Calendar.DAY_OF_MONTH, it.dayOfMonth)

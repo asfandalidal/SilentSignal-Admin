@@ -41,14 +41,11 @@ class AnnouncementViewModel @Inject constructor(
             if (!smooth && _initialLoading.value) {
                 _initialLoading.value = true
             }
-
             val newAnnouncements = getAnnouncementsUseCase()
                 .firstOrNull() ?: emptyList()
-
             if (newAnnouncements != _announcements.value) {
                 _announcements.value = newAnnouncements
             }
-
             _initialLoading.value = false
         }
     }
@@ -62,7 +59,7 @@ class AnnouncementViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 _loading.value = true
-                createAnnouncementUseCase(AnnouncementRequest(message, expiresAt, userId = 1))
+                createAnnouncementUseCase(AnnouncementRequest(message, expiresAt))
                 fetchAnnouncements(smooth = true)
                 onSuccess()
             } catch (e: Exception) {
