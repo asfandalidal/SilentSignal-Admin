@@ -1,8 +1,10 @@
 package com.azeemi.adminannouncement.presentation.screen
 
-import android.app.DatePickerDialog
-import android.app.TimePickerDialog
-import android.content.Context
+import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -11,15 +13,27 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import com.azeemi.adminannouncement.R
 import com.azeemi.adminannouncement.domain.model.Announcement
-import org.threeten.bp.LocalDateTime
-import org.threeten.bp.format.DateTimeFormatter
-import java.util.Calendar
+import com.commandiron.wheel_picker_compose.WheelDateTimePicker
+import com.commandiron.wheel_picker_compose.core.TimeFormat
+import com.commandiron.wheel_picker_compose.core.WheelPickerDefaults
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun WarningBanner() {
@@ -27,25 +41,30 @@ fun WarningBanner() {
         colors = CardDefaults.cardColors(containerColor = Color(0xFFD32F2F)),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 12.dp, bottom = 20.dp), // Moves it slightly down
+            .height(100.dp)
+            .padding(top = 12.dp, bottom = 30.dp),
         elevation = CardDefaults.elevatedCardElevation(6.dp),
-        shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp)
+        shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp),
+        border = BorderStroke(1.dp, color = Color.Black)
     ) {
         Row(
             modifier = Modifier
                 .padding(vertical = 14.dp, horizontal = 20.dp)
                 .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
         ) {
             Text(
                 text = "⚠️ Admin Access Only",
                 color = Color.White,
                 fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
             )
         }
     }
 }
+
 
 
 
@@ -55,16 +74,19 @@ fun AnnouncementItem(
     onDelete: (String) -> Unit
 ) {
     val formatter = DateTimeFormatter.ofPattern("dd-MMM-yy h:mm a")
-    val createdAtFormatted = LocalDateTime.parse(announcement.createdAt).format(formatter)
-    val expiresAtFormatted = LocalDateTime.parse(announcement.expiresAt).format(formatter)
+    val createdAtFormatted = convertUtcToLocal(announcement.createdAt) // Convert UTC to local
+    val expiresAtFormatted = convertUtcToLocal(announcement.expiresAt)
     var showDialog by remember { mutableStateOf(false) }
 
     Card(
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF222222)),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 6.dp), // Compact padding
-        elevation = CardDefaults.elevatedCardElevation(4.dp)
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        elevation = CardDefaults.elevatedCardElevation(4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.Black
+        ),
+        border = BorderStroke(width = 1.dp, color = Color(0xFFFFC107))
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -111,81 +133,244 @@ fun AnnouncementItem(
 
     // Delete Confirmation Dialog
     if (showDialog) {
-        AlertDialog(
-            onDismissRequest = { showDialog = false },
-            title = { Text("Delete Announcement?") },
-            text = { Text("Are you sure you want to delete this announcement?") },
-            confirmButton = {
-                TextButton(onClick = {
-                    onDelete(announcement.id.toString())
-                    showDialog = false
-                }) {
-                    Text("Delete", color = Color.Red)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDialog = false }) {
-                    Text("Cancel")
+        if (showDialog) {
+            Dialog(onDismissRequest = { showDialog = false }) {
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = Color(0xFF1E1E1E), // Dark background
+                    tonalElevation = 8.dp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                        .border(
+                            width = 2.dp,
+                            color = Color(0xFFFFC107),
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .padding(24.dp)
+                    ) {
+                        Text(
+                            text = "Delete Announcement?",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = Color.White
+                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Text(
+                            text = "Are you sure you want to delete?",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.LightGray
+                        )
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        Row(
+                            horizontalArrangement = Arrangement.End,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            TextButton(
+                                onClick = { showDialog = false },
+                                colors = ButtonDefaults.textButtonColors(contentColor = Color(0xFFFFA726))
+                            ) {
+                                Text(
+                                    text = "Cancel",
+                                    style = MaterialTheme.typography.labelLarge
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.width(12.dp))
+
+                            TextButton(
+                                onClick = {
+                                    onDelete(announcement.id.toString())
+                                    showDialog = false
+                                },
+                                colors = ButtonDefaults.textButtonColors(contentColor = Color(0xFFD32F2F))
+                            ) {
+                                Text(
+                                    text = "Delete",
+                                    style = MaterialTheme.typography.labelLarge
+                                )
+                            }
+                        }
+                    }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun ExpiresAtPicker(
+    expiresAt: LocalDateTime?,
+    onDateSelected: (LocalDateTime) -> Unit
+) {
+    var showPickerDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
+    // Step 1: Always use the same value for minAllowedTime
+    val minAllowedTime = remember { LocalDateTime.now().plusMinutes(1) }
+
+    // Step 2: Ensure initial value is at least minAllowedTime
+    var selectedDateTime by remember {
+        mutableStateOf(
+            if (expiresAt != null && expiresAt.isAfter(minAllowedTime)) expiresAt else minAllowedTime
         )
     }
-}
 
-
-
-// Expiry Date and Time Picker
-@Composable
-fun ExpiresAtPicker(expiresAt: LocalDateTime?, onDateSelected: (LocalDateTime) -> Unit) {
-    val context = LocalContext.current
-    val calendar = Calendar.getInstance()
-
-    // Convert LocalDateTime to Calendar if available
-    expiresAt?.let {
-        calendar.set(Calendar.YEAR, it.year)
-        calendar.set(Calendar.MONTH, it.monthValue - 1)
-        calendar.set(Calendar.DAY_OF_MONTH, it.dayOfMonth)
-        calendar.set(Calendar.HOUR_OF_DAY, it.hour)
-        calendar.set(Calendar.MINUTE, it.minute)
+    // Update selectedDateTime if expiresAt changes
+    LaunchedEffect(expiresAt) {
+        expiresAt?.let {
+            if (it.isAfter(minAllowedTime)) selectedDateTime = it
+            else selectedDateTime = minAllowedTime
+        }
     }
 
-    var selectedDate by remember { mutableStateOf(expiresAt?.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")) ?: "Select Expiry Date") }
-
-    Button(
-        onClick = {
-            val datePicker = DatePickerDialog(context, { _, year, month, dayOfMonth ->
-                val timePicker = TimePickerDialog(context, { _, hour, minute ->
-                    val selectedDateTime = LocalDateTime.of(year, month + 1, dayOfMonth, hour, minute)
-                    onDateSelected(selectedDateTime)
-                    selectedDate = selectedDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
-                }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true)
-
-                timePicker.show()
-            }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH))
-
-            datePicker.show()
-        },
-        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFA726)), // Orange Button
-        modifier = Modifier.fillMaxWidth()
+    Surface(
+        modifier = Modifier
+            .width(260.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .height(48.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color(0xFFFFA726))
+            .clickable { showPickerDialog = true },
+        color = Color(0xFFFFA726),
+        tonalElevation = 4.dp,
+        shadowElevation = 2.dp
     ) {
-        Text(selectedDate, color = Color.White)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .fillMaxSize()
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.calender),
+                contentDescription = "Calendar Icon",
+                tint = Color.White,
+                modifier = Modifier.size(20.dp)
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Text(
+                text = "Select Expiry Time",
+                color = Color.White,
+                fontSize = 16.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+
+    if (showPickerDialog) {
+        Dialog(onDismissRequest = { showPickerDialog = false }) {
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.background,
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text("Select Expiry Date & Time", style = MaterialTheme.typography.titleMedium)
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    WheelDateTimePicker(
+                        startDateTime = selectedDateTime,
+                        minDateTime = minAllowedTime, // ✅ use the same remembered value
+                        maxDateTime = LocalDateTime.of(2100, 12, 31, 23, 59),
+                        timeFormat = TimeFormat.AM_PM,
+                        size = DpSize(300.dp, 120.dp),
+                        rowCount = 5,
+                        textStyle = MaterialTheme.typography.bodyMedium,
+                        textColor = Color(0xFFffc300),
+                        selectorProperties = WheelPickerDefaults.selectorProperties(
+                            enabled = true,
+                            shape = RoundedCornerShape(8.dp),
+                            color = Color(0xFFf1faee).copy(alpha = 0.2f),
+                            border = BorderStroke(1.dp, Color(0xFFf1faee))
+                        )
+                    ) { snappedDateTime ->
+                        selectedDateTime = snappedDateTime
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Button(
+                        onClick = {
+                            onDateSelected(selectedDateTime)
+                            showPickerDialog = false
+                            Toast.makeText(context, "Date & Time selected!", Toast.LENGTH_LONG)
+                                .show()
+                        },
+                        enabled = selectedDateTime.isAfter(minAllowedTime),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFffc300))
+                    ) {
+                        Text("Confirm")
+                    }
+                }
+            }
+        }
     }
 }
 
-fun showDateTimePicker(context: Context, onDateTimeSelected: (LocalDateTime) -> Unit) {
-    val calendar = Calendar.getInstance()
+    @Composable
+    fun AnnouncementTextField(
+        value: String,
+        onMessageChange: (String) -> Unit,
+        modifier: Modifier = Modifier
+    ) {
+        OutlinedTextField(
+            value = value,
+            onValueChange = onMessageChange,
+            label = {
+                Text(
+                    text = "Enter Announcement",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            },
+            singleLine = false,
+            textStyle = TextStyle(
+                color = Color.White,
+                fontSize = 16.sp,
+                lineHeight = 22.sp
+            ),
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color(0xFFD32F2F),
+                unfocusedBorderColor = Color.Gray,
+                focusedLabelColor = Color(0xFFFFA726),
+                unfocusedLabelColor = Color.LightGray,
+                cursorColor = Color.White,
+                focusedTextColor = Color.White,
+                unfocusedTextColor = Color.White,
+                unfocusedContainerColor = Color(0xFF1E1E1E),
+                focusedContainerColor = Color(0xFF1E1E1E)
+            )
+        )
+    }
 
-    DatePickerDialog(
-        context,
-        { _, year, month, dayOfMonth ->
-            TimePickerDialog(context, { _, hour, minute ->
-                val selectedDateTime = LocalDateTime.of(year, month + 1, dayOfMonth, hour, minute)
-                onDateTimeSelected(selectedDateTime)
-            }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true).show()
-        },
-        calendar.get(Calendar.YEAR),
-        calendar.get(Calendar.MONTH),
-        calendar.get(Calendar.DAY_OF_MONTH)
-    ).show()
-}
+
+    // Function to convert UTC to local time
+    fun convertUtcToLocal(utcTime: String): String {
+        val instant = Instant.parse(utcTime) // Parse the UTC time (from the backend)
+        val localZone = ZoneId.systemDefault() // Get the device's local time zone
+        val localTime = instant.atZone(localZone) // Convert to local time
+
+        val formatter = DateTimeFormatter.ofPattern("dd-MMM-yy h:mm a") // Format for display
+        return localTime.format(formatter)
+    }
+
 

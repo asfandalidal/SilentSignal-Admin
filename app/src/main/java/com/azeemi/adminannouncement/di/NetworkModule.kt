@@ -12,8 +12,7 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
-
-    private const val BASE_URL = "http://192.168.100.31:8080/api/announcements/"
+    private const val BASE_URL = "https://silentsignal-app-19cb342dffa2.herokuapp.com/api/announcements/"
 
     @Provides
     @Singleton
