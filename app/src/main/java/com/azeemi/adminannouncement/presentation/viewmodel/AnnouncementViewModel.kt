@@ -85,10 +85,10 @@ class AnnouncementViewModel @Inject constructor(
         }
     }
 
-    fun sendNotification(title: String, body: String) {
+    fun sendNotification(title: String, body: String,expiresAt: String) {
         viewModelScope.launch {
             try {
-                notificationUseCase.invoke(NotificationRequest(title, body))
+                notificationUseCase.invoke(NotificationRequest(title, body,expiresAt ))
                 Log.d("Notification", "Sent successfully")
             } catch (e: Exception) {
                 Log.e("Notification", "Error: ${e.message}")
