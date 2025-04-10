@@ -65,9 +65,6 @@ fun WarningBanner() {
     }
 }
 
-
-
-
 @Composable
 fun AnnouncementItem(
     announcement: Announcement,
@@ -285,7 +282,7 @@ fun ExpiresAtPicker(
 
                     WheelDateTimePicker(
                         startDateTime = selectedDateTime,
-                        minDateTime = minAllowedTime, // ✅ use the same remembered value
+                        minDateTime = minAllowedTime,
                         maxDateTime = LocalDateTime.of(2100, 12, 31, 23, 59),
                         timeFormat = TimeFormat.AM_PM,
                         size = DpSize(300.dp, 120.dp),
