@@ -34,7 +34,7 @@ fun SplashScreen(
                 }
             )
         )
-        delay(2000) // Delay before navigating
+        delay(2000)
         onSplashFinished()
     }
 
